@@ -127,10 +127,33 @@ contract RentManager {
     //   - the host cannot send an invoice if the host has an existing invoice that 
     //     has not been fully paid out yet; in this case, return false
     function sendInvoice(address toAddr, uint256 amount) public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return false;
+        
+        // If the user is not a host or if the recipient is not a guest, return false.
+        if (roles[msg.sender] != 2 || roles[toAddr] != 3) {
+            return false;
+        }
+
+        // Traverse the invoice array to find an invoice from the same host.
+        for (uint i = 0; i < invoices.length; i++) {
+            if (invoices[i].host == msg.sender) {
+
+                // If the invoice has not been paid, return false.
+                if (invoices[i].remainingAmount != 0) {
+                    return false;
+                }
+            }
+        }
+
+        // Create a new invoice with the necessary parameters.
+        Invoice memory newInvoice = Invoice({
+            amount: amount,
+            remainingAmount: amount,
+            host: msg.sender,
+            guest: toAddr
+        });
+        invoices.push(newInvoice);
+        
+        return true;
     }
 
     // View the latest invoice
