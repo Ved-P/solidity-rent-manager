@@ -171,7 +171,9 @@ contract RentManager {
         if (roles[msg.sender] == 2) {
 
             // Traverse the invoices array backward and find an invoice with the same host.
-            for (uint i = invoices.length - 1; i >= 0; i++) {
+            uint i = invoices.length;
+            do {
+                i--;
                 if (invoices[i].host == msg.sender) {
 
                     // Return the 4-tuple.
@@ -182,14 +184,16 @@ contract RentManager {
                         invoices[i].guest
                     );
                 }
-            }
+            } while (i > 0);
         }
 
         // If the user is a guest...
         else if (roles[msg.sender] == 3) {
 
             // Traverse the invoices array backward and find an invoice with the same guest.
-            for (uint i = invoices.length - 1; i >= 0; i++) {
+            uint i = invoices.length;
+            do {
+                i--;
                 if (invoices[i].guest == msg.sender) {
 
                     // Return the 4-tuple.
@@ -200,10 +204,10 @@ contract RentManager {
                         invoices[i].guest
                     );
                 }
-            }
+            } while (i > 0);
         }
 
-        // If no invoice was foundr, return the default result.
+        // If no invoice was found, return the default result.
         return (0, 0, address(0), address(0));
     }
 
@@ -235,7 +239,9 @@ contract RentManager {
         }
 
         // Traverse the invoices array backward and find an invoice with the same guest.
-        for (uint i = invoices.length - 1; i >= 0; i++) {
+        uint i = invoices.length;
+        do {
+            i--;
             if (invoices[i].guest == msg.sender) {
 
                 // If amount <= remainingAmount, pay the amount.
@@ -254,7 +260,7 @@ contract RentManager {
 
                 return true;
             }
-        }
+        } while (i > 0);
 
         return false;
     }
