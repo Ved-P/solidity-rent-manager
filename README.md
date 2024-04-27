@@ -1,66 +1,13 @@
-## Foundry
+# solidity-rent-manager
+This project contains an implementation of a simple smart contract built in Solidity to simulate a decentralize Rent Manager application. It handles the registration of hosts and guests in the network and manages the assignment and payment of invoices between said hosts and guests.
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+# How to Run the Project
+To run the program, download the Foundry toolset used to test Solidity applications. Then, use the following command:
+```
+forge test.
 ```
 
-### Test
+# Code Organization
+The code relevant to the application implementation is located in `src/RentManager.sol`. The file contains a variety of functions, some of which were implemented by me, to handle user registration and invoice processing.
 
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+The file `test/RentManager.t.sol` contains seven test cases used to test that the application works as expected.
