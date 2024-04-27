@@ -86,10 +86,15 @@ contract RentManager {
     //   - only unregistered users can register; otherwise, return false
     //   - a user can only register once; otherwise, return false
     function registerHost() public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return false;
+
+        // If the user is registered, return false.
+        if (roles[msg.sender] != 0) {
+            return false;
+        }
+
+        // Otherwise, set the role to host.
+        roles[msg.sender] = 2;
+        return true;
     }
 
     // Register the caller as a guest
@@ -99,10 +104,15 @@ contract RentManager {
     //   - only unregistered users can register; otherwise, return false
     //   - a user can only register once; otherwise, return false
     function registerGuest() public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return false;
+        
+        // If the user is registered, return false.
+        if (roles[msg.sender] != 0) {
+            return false;
+        }
+
+        // Otherwise, set the role to guest.
+        roles[msg.sender] = 3;
+        return true;
     }
 
     // Send out an invoice to a guest
