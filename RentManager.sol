@@ -166,9 +166,44 @@ contract RentManager {
     //   - if (for the guest) no invoice has been received before or (for the host) no invoice has
     //     been sent out before, simply return (0, 0, address(0), address(0))
     function viewInvoice() public view returns (uint256, uint256, address, address) {
-        // ============================
-        // add your implementation here
-        // ============================
+        
+        // If the user is a host...
+        if (roles[msg.sender] == 2) {
+
+            // Traverse the invoices array backward and find an invoice with the same host.
+            for (uint i = invoices.length - 1; i >= 0; i++) {
+                if (invoices[i].host == msg.sender) {
+
+                    // Return the 4-tuple.
+                    return (
+                        invoices[i].amount,
+                        invoices[i].remainingAmount,
+                        invoices[i].host,
+                        invoices[i].guest
+                    );
+                }
+            }
+        }
+
+        // If the user is a guest...
+        else if (roles[msg.sender] == 3) {
+
+            // Traverse the invoices array backward and find an invoice with the same guest.
+            for (uint i = invoices.length - 1; i >= 0; i++) {
+                if (invoices[i].guest == msg.sender) {
+
+                    // Return the 4-tuple.
+                    return (
+                        invoices[i].amount,
+                        invoices[i].remainingAmount,
+                        invoices[i].host,
+                        invoices[i].guest
+                    );
+                }
+            }
+        }
+
+        // If no invoice was foundr, return the default result.
         return (0, 0, address(0), address(0));
     }
 
