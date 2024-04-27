@@ -223,9 +223,39 @@ contract RentManager {
     //     to "paid out" by setting the remaining amount to 0
     //   - don't forget to deduce the actually paid amount from the guest's balance
     function payInvoice(uint256 amount) public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
+        
+        // If the user is not a guest, return false.
+        if (roles[msg.sender] != 3) {
+            return false;
+        }
+
+        // If the amount to pay is more than the guest's balance, return false.
+        if (amount > balances[msg.sender]) {
+            return false;
+        }
+
+        // Traverse the invoices array backward and find an invoice with the same guest.
+        for (uint i = invoices.length - 1; i >= 0; i++) {
+            if (invoices[i].guest == msg.sender) {
+
+                // If amount <= remainingAmount, pay the amount.
+                if (amount <= invoices[i].remainingAmount) {
+                    balances[msg.sender] -= amount;
+                    balances[invoices[i].host] += amount;
+                    invoices[i].remainingAmount -= amount;
+                }
+
+                // If amount > remainingAmount, pay the remainingAmount.
+                else {
+                    balances[msg.sender] -= invoices[i].remainingAmount;
+                    balances[invoices[i].host] += invoices[i].remainingAmount;
+                    invoices[i].remainingAmount = 0;
+                }
+
+                return true;
+            }
+        }
+
         return false;
     }
 
