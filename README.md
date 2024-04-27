@@ -4,7 +4,7 @@ This project contains an implementation of a simple smart contract built in Soli
 # How to Run the Project
 To run the program, download the Foundry toolset used to test Solidity applications. Then, use the following command:
 ```
-forge test.
+forge test
 ```
 
 # Code Organization
