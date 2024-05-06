@@ -76,10 +76,7 @@ contract RentManager {
     // Specs:
     //   - check role definitions near the `roles` data structure
     function viewRole() public view returns (uint8) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return 0;
+        return roles[msg.sender];
     }
 
     // Register the caller as a host
@@ -89,10 +86,15 @@ contract RentManager {
     //   - only unregistered users can register; otherwise, return false
     //   - a user can only register once; otherwise, return false
     function registerHost() public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return false;
+
+        // If the user is registered, return false.
+        if (roles[msg.sender] != 0) {
+            return false;
+        }
+
+        // Otherwise, set the role to host.
+        roles[msg.sender] = 2;
+        return true;
     }
 
     // Register the caller as a guest
@@ -102,10 +104,15 @@ contract RentManager {
     //   - only unregistered users can register; otherwise, return false
     //   - a user can only register once; otherwise, return false
     function registerGuest() public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return false;
+        
+        // If the user is registered, return false.
+        if (roles[msg.sender] != 0) {
+            return false;
+        }
+
+        // Otherwise, set the role to guest.
+        roles[msg.sender] = 3;
+        return true;
     }
 
     // Send out an invoice to a guest
@@ -120,10 +127,33 @@ contract RentManager {
     //   - the host cannot send an invoice if the host has an existing invoice that 
     //     has not been fully paid out yet; in this case, return false
     function sendInvoice(address toAddr, uint256 amount) public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
-        return false;
+        
+        // If the user is not a host or if the recipient is not a guest, return false.
+        if (roles[msg.sender] != 2 || roles[toAddr] != 3) {
+            return false;
+        }
+
+        // Traverse the invoice array to find an invoice from the same host.
+        for (uint i = 0; i < invoices.length; i++) {
+            if (invoices[i].host == msg.sender) {
+
+                // If the invoice has not been paid, return false.
+                if (invoices[i].remainingAmount != 0) {
+                    return false;
+                }
+            }
+        }
+
+        // Create a new invoice with the necessary parameters.
+        Invoice memory newInvoice = Invoice({
+            amount: amount,
+            remainingAmount: amount,
+            host: msg.sender,
+            guest: toAddr
+        });
+        invoices.push(newInvoice);
+        
+        return true;
     }
 
     // View the latest invoice
@@ -136,9 +166,48 @@ contract RentManager {
     //   - if (for the guest) no invoice has been received before or (for the host) no invoice has
     //     been sent out before, simply return (0, 0, address(0), address(0))
     function viewInvoice() public view returns (uint256, uint256, address, address) {
-        // ============================
-        // add your implementation here
-        // ============================
+        
+        // If the user is a host...
+        if (roles[msg.sender] == 2) {
+
+            // Traverse the invoices array backward and find an invoice with the same host.
+            uint i = invoices.length;
+            do {
+                i--;
+                if (invoices[i].host == msg.sender) {
+
+                    // Return the 4-tuple.
+                    return (
+                        invoices[i].amount,
+                        invoices[i].remainingAmount,
+                        invoices[i].host,
+                        invoices[i].guest
+                    );
+                }
+            } while (i > 0);
+        }
+
+        // If the user is a guest...
+        else if (roles[msg.sender] == 3) {
+
+            // Traverse the invoices array backward and find an invoice with the same guest.
+            uint i = invoices.length;
+            do {
+                i--;
+                if (invoices[i].guest == msg.sender) {
+
+                    // Return the 4-tuple.
+                    return (
+                        invoices[i].amount,
+                        invoices[i].remainingAmount,
+                        invoices[i].host,
+                        invoices[i].guest
+                    );
+                }
+            } while (i > 0);
+        }
+
+        // If no invoice was found, return the default result.
         return (0, 0, address(0), address(0));
     }
 
@@ -158,9 +227,41 @@ contract RentManager {
     //     to "paid out" by setting the remaining amount to 0
     //   - don't forget to deduce the actually paid amount from the guest's balance
     function payInvoice(uint256 amount) public returns (bool) {
-        // ============================
-        // add your implementation here
-        // ============================
+        
+        // If the user is not a guest, return false.
+        if (roles[msg.sender] != 3) {
+            return false;
+        }
+
+        // If the amount to pay is more than the guest's balance, return false.
+        if (amount > balances[msg.sender]) {
+            return false;
+        }
+
+        // Traverse the invoices array backward and find an invoice with the same guest.
+        uint i = invoices.length;
+        do {
+            i--;
+            if (invoices[i].guest == msg.sender) {
+
+                // If amount <= remainingAmount, pay the amount.
+                if (amount <= invoices[i].remainingAmount) {
+                    balances[msg.sender] -= amount;
+                    balances[invoices[i].host] += amount;
+                    invoices[i].remainingAmount -= amount;
+                }
+
+                // If amount > remainingAmount, pay the remainingAmount.
+                else {
+                    balances[msg.sender] -= invoices[i].remainingAmount;
+                    balances[invoices[i].host] += invoices[i].remainingAmount;
+                    invoices[i].remainingAmount = 0;
+                }
+
+                return true;
+            }
+        } while (i > 0);
+
         return false;
     }
 
